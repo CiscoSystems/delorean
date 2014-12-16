@@ -23,6 +23,10 @@ Setup
     # Add the user you intend to run as to the docker group and login again
     git clone https://github.com/openstack-packages/delorean.git
     cd delorean
+
+    git clone https://github.com/redhat-openstack/rdoinfo.git
+    export PYTHONPATH=$PYTHONPATH:rdoinfo
+
     ./scripts/create_build_image.sh
     virtualenv ../delorean-venv
     . ../delorean-venv/bin/activate
