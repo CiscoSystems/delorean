@@ -86,6 +86,55 @@ class Project(Base):
         self.last_email = int(time.time())
 
 
+def get_absolute_path_for_file(file_name, splitdir=None):
+    '''
+    Return the filename in absolute path for any file
+    passed as relative path.
+    '''
+    base = os.path.basename(__file__)
+    if splitdir is not None:
+        splitdir = splitdir + "/" + base
+    else:
+        splitdir = base
+
+    if os.path.isabs(__file__):
+        abs_file_path = os.path.join(__file__.split(splitdir)[0],
+                                     file_name)
+    else:
+        abs_file = os.path.abspath(__file__)
+        abs_file_path = os.path.join(abs_file.split(splitdir)[0],
+                                     file_name)
+
+    return abs_file_path
+
+
+def print_delorean_usage(parser):
+    '''
+    Display usage information for delorean.
+    '''
+    parser.print_help()
+    print "Example usage: "
+    print "delorean --config-file projects.ini " \
+        "--info-file ./rdo.yml --package-name python-six"
+
+
+def validate_options(parser, options):
+    '''
+    Validate user input.
+    '''
+    if not options.info_file:
+        logger.error("Need to provide a package info file")
+        print_delorean_usage(parser)
+        sys.exit()
+
+    if not options.config_file:
+        logger.error("Need to provide a config file")
+        print_delorean_usage(parser)
+        sys.exit()
+
+
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config-file', help="Config file")
@@ -99,11 +148,13 @@ def main():
     parser.add_argument('--package-name',
                         help="Build a specific package name only.")
     parser.add_argument('--dev', action="store_true",
-                        help="Don't reset packaging git repo, force build "\
-                             "and add public master repo for dependencies "\
+                        help="Don't reset packaging git repo, force build "
+                             "and add public master repo for dependencies "
                              "(dev mode).")
 
     options, args = parser.parse_known_args(sys.argv[1:])
+
+    validate_options(parser, options)
 
     package_info = rdoinfo.parse_info_file(options.info_file)
 
@@ -310,6 +361,21 @@ def build(cp, package_info, commit, env_vars, dev_mode):
     scriptsdir = datadir.replace("data", "scripts")
     yumrepodir = os.path.join("repos", commit.getshardedcommitdir())
     yumrepodir_abs = os.path.join(datadir, yumrepodir)
+
+    # We need to make sure that scriptsdir exists and has
+    # the scripts copied over, as this folder is mapped to the
+    # docker container. The rpm_build scripts in the scriptsdir are
+    # invoked from the container to build the RPM.
+    if not os.path.exists(scriptsdir):
+        os.makedirs(scriptsdir)
+
+    if os.listdir(scriptsdir) == []:
+        src_scriptsdir = get_absolute_path_for_file("./scripts", "delorean")
+        sh_files = os.listdir(src_scriptsdir)
+        for sh_file in sh_files:
+            sh_file_path = os.path.join(src_scriptsdir, sh_file)
+            if os.path.isfile(sh_file_path):
+                shutil.copy(sh_file_path, scriptsdir)
 
     commit_hash = commit.commit_hash
     project_name = commit.project_name
