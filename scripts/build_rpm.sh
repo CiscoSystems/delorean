@@ -7,6 +7,7 @@ GROUP_ID=$4 # chown resulting files to this GUID
 
 mkdir -p ~/rpmbuild/SOURCES ~/rpmbuild/SPECS $OUTPUT_DIRECTORY
 yum install -y --nogpg python-pip python-pbr
+pip install oslosphinx
 
 # So that we don't have to maintain packaging for all dependencies we install RDO
 # Which will contain a lot of the non openstack dependencies
@@ -84,6 +85,10 @@ VERSION=${VERSION/-/.}
 sed -i -e "s/Version:.*/Version: $VERSION/g" *.spec
 sed -i -e "s/Release:.*/Release: $RELEASE%{?dist}/g" *.spec
 sed -i -e "s/Source0:.*/Source0: $TARBALL/g" *.spec
+
+#Skip any patches for now. The spec file and repo do not match.
+sed -i -e "s/%patch*/#%patch/" *.spec
+
 cat *.spec
 yum-builddep -y *.spec
 rpmbuild -ba *.spec  --define="upstream_version $UPSTREAMVERSION"
