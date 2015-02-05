@@ -1,7 +1,4 @@
 #!/bin/bash -xe
-#sudo /usr/local/sbin/mock -r epel-6-x86_64 --clean
-#sudo /usr/local/sbin/mock -r epel-6-x86_64 --init
-
 source /home/centos/rpmbuilder/delorean/globals.sh
 
 echo "Start RPM Build"
