@@ -92,9 +92,6 @@ sed -i -e "s/%patch*/#%patch/" *.spec
 cat *.spec
 yum-builddep -y *.spec
 
-#sudo /usr/local/sbin/mock -r epel-6-x86_64 --clean
-#sudo /usr/local/sbin/mock -r epel-6-x86_64 --init
-#sudo /usr/local/sbin/mock -r epel-6-x86_64 --spec=*.spec --sources=. --resultdir=./mock/result --buildsrpm # rpmbuild -ba *.spec  --define="upstream_version $UPSTREAMVERSION"
 rpmbuild -ba *.spec  --define="upstream_version $UPSTREAMVERSION"
 
 find ~/rpmbuild/RPMS ~/rpmbuild/SRPMS -type f | xargs cp -t $OUTPUT_DIRECTORY

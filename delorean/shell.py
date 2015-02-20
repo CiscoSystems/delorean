@@ -417,11 +417,12 @@ def build(cp, package_info, commit, env_vars, dev_mode):
 
     docker_run_cmd.extend(["-t", "--volume=%s:/data" % datadir,
                            "--volume=%s:/scripts" % scriptsdir,
-                           "--name", "builder", "delorean/fedora",
-                           "/scripts/build_rpm_wrapper.sh", project_name,
+                           "--name", "builder", "delorean/fedora_mock",
+                           "mock -r epel-6-x86_64 --chroot /scripts/build_rpm_wrapper.sh", project_name,
                            "/data/%s" % yumrepodir, str(os.getuid()),
                            str(os.getgid())])
     try:
+        logger.error('The command executed was: %s', docker_run_cmd)
         sh.docker("run", docker_run_cmd)
     except:
         logger.error('Build failed. See logs at: ./data/%s/' % yumrepodir)

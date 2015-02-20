@@ -38,6 +38,7 @@ sqlite3 commits.sqlite "$sql_del_cmd"
 source $DELOREAN_ENV
 
 export PYTHONPATH=$PYTHONPATH:$RDO_ROOT
+echo $PROJECT
 delorean --config-file projects.ini --info-file cisco.yml --package-name $PROJECT 
 
 
